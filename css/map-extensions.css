@@ -373,3 +373,70 @@
 .leaflet-tooltip-localites:before {
     border-top-color: rgba(141, 90, 153, 0.9);
 }
+
+/* ===== RESPONSIVE: mobile / small screens ===== */
+@media (max-width: 768px) {
+    /* Hide side panels by default to maximize map area */
+    .left-panel,
+    .right-panel {
+        display: none !important;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 320px;
+        background: #ffffff;
+        z-index: 2200;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        overflow: auto;
+    }
+
+    /* Allow panels to be shown when a JS toggle adds an "open" class */
+    .left-panel.open,
+    .right-panel.open {
+        display: block !important;
+    }
+
+    /* Make main container and map take full width */
+    .container {
+        display: block;
+    }
+
+    .map-container {
+        margin: 0;
+        width: 100%;
+        height: calc(100vh - 56px); /* leave space for nav */
+    }
+
+    /* Show small toggle buttons on top of the map */
+    .toggle-left-btn,
+    .toggle-right-btn {
+        display: inline-flex !important;
+        position: fixed;
+        top: 12px;
+        z-index: 2300;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        border: none;
+        cursor: pointer;
+    }
+
+    .toggle-left-btn { left: 10px; }
+    .toggle-right-btn { right: 10px; }
+
+    .toggle-left-btn i, .toggle-right-btn i {
+        color: #2b5d6f;
+        font-size: 18px;
+    }
+
+    /* Reduce nav items on mobile to avoid overflow */
+    nav .nav-menu { display: none; }
+    nav .nav-right .search-bar { display: none; }
+
+    /* Ensure toolbars and floating controls remain accessible */
+    .map-toolbar { left: 10px; bottom: 80px; }
+}
