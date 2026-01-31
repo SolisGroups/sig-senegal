@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>SIG Sénégal - Cartographie Web des Limites Administratives</title>
+
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+    <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="css/MarkerCluster.css">
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="css/leaflet-search.css">
+    <link rel="stylesheet" href="css/leaflet.photon.css">
+    <link rel="stylesheet" href="css/leaflet-measure.css">
+
+    <!-- Modern UI CSS -->
+    <link rel="stylesheet" href="css/modern-ui.css">
+    <link rel="stylesheet" href="css/map-extensions.css">
+</head>
+
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-map"></i>
+            <span>SIG Sénégal</span>
+        </div>
+
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-info-circle"></i>
+                    <span>À propos</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-database"></i>
+                    <span>Catalogue</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link dropdown-toggle">
+                    <i class="fas fa-tools"></i>
+                    <span>Outils</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-map-pin"></i>
+                        <span>Requête spatiale</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-filter"></i>
+                        <span>Requête attributaire</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-file-csv"></i>
+                        <span>Télécharger CSV</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-file-json"></i>
+                        <span>Télécharger GeoJSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link dropdown-toggle">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Couches</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-eye"></i>
+                        <span>Afficher/Masquer</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-palette"></i>
+                        <span>Styles</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-list"></i>
+                        <span>Légende</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="search-bar">
+                <input type="text" placeholder="Rechercher...">
+                <button type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- LEFT PANEL - LAYERS CONTROL -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-layer-group"></i> Couches</h3>
+                <button class="panel-close-btn" id="close-left-panel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="panel-section">
+                <h4>Couches disponibles</h4>
+                <div id="layers-list">
+                    <!-- Les couches seront ajoutées dynamiquement ici -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4>Propriétés des couches</h4>
+                <div id="layer-properties">
+                    <!-- Les propriétés seront affichées ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MAP CONTAINER -->
+        <div class="map-container">
+            <div id="map"></div>
+
+            <!-- TOOLBAR -->
+            <div class="map-toolbar"></div>
+
+            <!-- MINIMAP -->
+            <!-- Sera créé dynamiquement par le script -->
+
+            <!-- INFO BAR -->
+            <div class="info-bar">
+                <div class="coordinates-display">
+                    <div class="coord-item">
+                        <span class="coord-label">Latitude:</span>
+                        <span>0.000000°</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">Longitude:</span>
+                        <span>0.000000°</span>
+                    </div>
+                </div>
+                <div class="scale-display">
+                    <span class="scale-label">1 km</span>
+                    <span> | Zoom: <span id="zoom-level">7</span></span>
+                </div>
+            </div>
+
+            <!-- TOGGLE BUTTONS -->
+            <button class="toggle-btn toggle-left-btn" title="Afficher/Masquer les couches">
+                <i class="fas fa-bars"></i>
+            </button>
+            <button class="toggle-btn toggle-right-btn" title="Afficher/Masquer les fonds de carte">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- RIGHT PANEL - BASEMAPS & LEGEND -->
+        <div class="right-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-map"></i> Fonds de carte</h3>
+                <button class="panel-close-btn" id="close-right-panel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="panel-section">
+                <h4>Fonds de carte disponibles</h4>
+                <div id="basemaps-list">
+                    <label class="layer-item">
+                        <input type="radio" name="basemap" value="osm" checked>
+                        <span><i class="fas fa-map"></i> OpenStreetMap</span>
+                    </label>
+                    <label class="layer-item">
+                        <input type="radio" name="basemap" value="satellite">
+                        <span><i class="fas fa-satellite"></i> Satellite</span>
+                    </label>
+                    <label class="layer-item">
+                        <input type="radio" name="basemap" value="terrain">
+                        <span><i class="fas fa-mountain"></i> Terrain</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4>Légende</h4>
+                <div class="legend-container" id="legend">
+                    <!-- La légende sera générée dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Home Modal -->
+    <div id="home-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-home"></i> Accueil</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>Bienvenue sur le SIG Sénégal</h3>
+                <p>Cette application cartographique web affiche les limites administratives, le réseau routier, le
+                    réseau hydrographique et les localités du Sénégal.</p>
+                <p><strong>Fonctionnalités:</strong></p>
+                <ul>
+                    <li>Visualisation interactive des données géographiques</li>
+                    <li>Recherche et filtrage des couches</li>
+                    <li>Export des données en CSV et GeoJSON</li>
+                    <li>Mesure de distances et surfaces</li>
+                    <li>Outils de requête spatiale et attributaire</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> À propos</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>SIG Sénégal v1.0</h3>
+                <p><strong>Auteur:</strong> Système d'Information Géographique du Sénégal</p>
+                <p><strong>Technologie:</strong> Leaflet.js, QGIS2Web</p>
+                <p><strong>Date de création:</strong> 2026</p>
+                <p><strong>Licence:</strong> Libre d'utilisation</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Modal -->
+    <div id="catalog-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-database"></i> Catalogue des données</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>Données disponibles:</h3>
+                <div style="margin-top: 15px;">
+                    <h4>1. Régions</h4>
+                    <p>Les 14 régions administratives du Sénégal</p>
+
+                    <h4 style="margin-top: 15px;">2. Départements</h4>
+                    <p>Les départements du Sénégal</p>
+
+                    <h4 style="margin-top: 15px;">3. Arrondissements</h4>
+                    <p>Les arrondissements du Sénégal</p>
+
+                    <h4 style="margin-top: 15px;">4. Routes</h4>
+                    <p>Le réseau routier du Sénégal avec classification</p>
+
+                    <h4 style="margin-top: 15px;">5. Localités</h4>
+                    <p>Les localités et villages du Sénégal</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spatial Query Modal -->
+    <div id="spatial-query-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-map-pin"></i> Requête spatiale</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>Sélectionner les critères spatiaux</h3>
+                <div style="margin-top: 15px;">
+                    <label style="display: block; margin-bottom: 10px;">
+                        <strong>Type de requête:</strong>
+                    </label>
+                    <div style="margin-left: 10px;">
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="radio" name="spatial-query" value="point" checked> Point
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="radio" name="spatial-query" value="buffer"> Buffer (rayon)
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="radio" name="spatial-query" value="extent"> Étendue (rectangle)
+                        </label>
+                    </div>
+
+                    <label style="display: block; margin-top: 15px; margin-bottom: 10px;">
+                        <strong>Couches à interroger:</strong>
+                    </label>
+                    <div style="margin-left: 10px;">
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="query-layer" value="region" checked> Régions
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="query-layer" value="departement" checked> Départements
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="query-layer" value="arrondissement"> Arrondissements
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="query-layer" value="routes"> Routes
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="query-layer" value="localites"> Localités
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn" id="execute-spatial-query"
+                            style="width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-search"></i> Exécuter la requête
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attribute Query Modal -->
+    <div id="attribute-query-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-filter"></i> Requête attributaire</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>Filtrer les données par attributs</h3>
+                <div style="margin-top: 15px;">
+                    <label style="display: block; margin-bottom: 10px;">
+                        <strong>Sélectionner une couche:</strong>
+                    </label>
+                    <select id="attribute-layer"
+                        style="width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="">-- Choisir une couche --</option>
+                        <option value="region">Régions</option>
+                        <option value="departement">Départements</option>
+                        <option value="arrondissement">Arrondissements</option>
+                        <option value="routes">Routes</option>
+                        <option value="localites">Localités</option>
+                    </select>
+
+                    <label style="display: block; margin-bottom: 10px;">
+                        <strong>Critères de filtrage:</strong>
+                    </label>
+                    <div style="margin-left: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <select id="attribute-field"
+                                style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">-- Sélectionner un attribut --</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <select id="attribute-operator"
+                                style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="=">=</option>
+                                <option value="!=">!=</option>
+                                <option value=">">></option>
+                                <option value="<">
+                                    << /option>
+                                <option value=">=">>=</option>
+                                <option value="<=">
+                                    <=< /option>
+                                <option value="contains">Contient</option>
+                                <option value="starts">Commence par</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="text" id="attribute-value" placeholder="Valeur à chercher"
+                                style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 15px;">
+                        </div>
+                    </div>
+
+                    <button class="btn" id="execute-attribute-query"
+                        style="width: 100%; padding: 10px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-filter"></i> Appliquer le filtre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <!-- Leaflet & Extensions (MUST load first) -->
+    <script src="js/leaflet.js"></script>
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/L.Control.Layers.Tree.min.js"></script>
+    <script src="js/L.Control.Locate.min.js"></script>
+    <script src="js/leaflet.rotatedMarker.js"></script>
+    <script src="js/leaflet.pattern.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="js/rbush.min.js"></script>
+    <script src="js/labelgun.min.js"></script>
+    <script src="js/labels.js"></script>
+    <script src="js/leaflet.photon.js"></script>
+    <script src="js/leaflet-measure.js"></script>
+    <script src="js/leaflet.markercluster.js"></script>
+    <script src="js/leaflet-search.js"></script>
+
+    <!-- Modern App Script (MUST load BEFORE data) -->
+    <script src="js/app-modern.js"></script>
+
+    <!-- Data Files (load after app-modern to have access to map) -->
+    <script src="data/Region_1.js"></script>
+    <script src="data/Departement_2.js"></script>
+    <script src="data/Arrondissement_3.js"></script>
+    <script src="data/Routes_4.js"></script>
+    <script src="data/localites_5.js"></script>
+
+    <!-- QGIS2WEB Integration (MUST load LAST) -->
+    <script src="js/qgis2web-integration.js"></script>
+</body>
+
+</html>
