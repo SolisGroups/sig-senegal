@@ -24,6 +24,8 @@
     <!-- Modern UI CSS -->
     <link rel="stylesheet" href="css/modern-ui.css">
     <link rel="stylesheet" href="css/map-extensions.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2b5d6f">
 </head>
 
 <body>
@@ -110,6 +112,7 @@
                     <i class="fas fa-search"></i>
                 </button>
             </div>
+            <button id="pwa-install-btn" style="display:none; margin-left:10px; padding:6px 10px; border-radius:4px; background:#2b5d6f; color:#fff; border:none; cursor:pointer;">Installer</button>
         </div>
     </nav>
 
@@ -154,11 +157,11 @@
                 <div class="coordinates-display">
                     <div class="coord-item">
                         <span class="coord-label">Latitude:</span>
-                        <span>0.000000°</span>
+                            <span id="lat-value">0.000000°</span>
                     </div>
                     <div class="coord-item">
                         <span class="coord-label">Longitude:</span>
-                        <span>0.000000°</span>
+                            <span id="lng-value">0.000000°</span>
                     </div>
                 </div>
                 <div class="scale-display">
@@ -377,12 +380,10 @@
                                 style="width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #ddd;">
                                 <option value="=">=</option>
                                 <option value="!=">!=</option>
-                                <option value=">">></option>
-                                <option value="<">
-                                    << /option>
-                                <option value=">=">>=</option>
-                                <option value="<=">
-                                    <=< /option>
+                                <option value=">">&gt;</option>
+                                <option value="<">&lt;</option>
+                                <option value=">=">&gt;=</option>
+                                <option value="<=">&lt;=</option>
                                 <option value="contains">Contient</option>
                                 <option value="starts">Commence par</option>
                             </select>
@@ -432,6 +433,63 @@
 
     <!-- QGIS2WEB Integration (MUST load LAST) -->
     <script src="js/qgis2web-integration.js"></script>
+    <script>
+        (function(){
+            // Mise à jour de l'affichage des coordonnées
+            function updateCoords(lat, lng) {
+                var latEl = document.getElementById('lat-value');
+                var lngEl = document.getElementById('lng-value');
+                if (latEl) latEl.textContent = lat.toFixed(6) + '°';
+                if (lngEl) lngEl.textContent = lng.toFixed(6) + '°';
+            }
+
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    console.log('Latitude: ' + position.coords.latitude);
+                    console.log('Longitude: ' + position.coords.longitude);
+                    updateCoords(position.coords.latitude, position.coords.longitude);
+                }, function(error) {
+                    console.error('Error occurred. Error code: ' + error.code);
+                }, { enableHighAccuracy: true, maximumAge: 30000 });
+            } else {
+                console.log('Geolocation is not supported by this browser.');
+            }
+
+            // Enregistrement du service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(function(reg) {
+                    console.log('Service worker registered.', reg);
+                }).catch(function(err) {
+                    console.error('Service worker registration failed: ', err);
+                });
+            }
+
+            // Gestion de l'installation PWA (beforeinstallprompt)
+            var deferredPrompt;
+            var installBtn = document.getElementById('pwa-install-btn');
+
+            window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (installBtn) {
+                    installBtn.style.display = 'inline-block';
+                    installBtn.addEventListener('click', function() {
+                        installBtn.style.display = 'none';
+                        if (!deferredPrompt) return;
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(choiceResult) {
+                            console.log('User choice', choiceResult.outcome);
+                            deferredPrompt = null;
+                        });
+                    });
+                }
+            });
+
+            window.addEventListener('appinstalled', function() {
+                console.log('PWA installed');
+            });
+        })();
+    </script>
 </body>
 
 </html>
