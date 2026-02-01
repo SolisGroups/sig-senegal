@@ -24,7 +24,10 @@
     <!-- Modern UI CSS -->
     <link rel="stylesheet" href="css/modern-ui.css">
     <link rel="stylesheet" href="css/map-extensions.css">
+    <link rel="stylesheet" href="css/pwa-mobile.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="description" content="SIG Sénégal — application cartographique interactive (Leaflet).">
     <meta name="theme-color" content="#2b5d6f">
 </head>
 
@@ -423,6 +426,7 @@
 
     <!-- Modern App Script (MUST load BEFORE data) -->
     <script src="js/app-modern.js"></script>
+    <script src="js/gps-control.js"></script>
 
     <!-- Data Files (load after app-modern to have access to map) -->
     <script src="data/Region_1.js"></script>

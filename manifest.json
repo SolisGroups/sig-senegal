@@ -1,22 +1,17 @@
 {
   "name": "SIG Sénégal",
   "short_name": "SIG-SN",
+  "description": "Application cartographique interactive du Sénégal — limites administratives, routes et localités.",
+  "lang": "fr-FR",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2b5d6f",
+  "categories": ["maps", "navigation"],
+  "prefer_related_applications": false,
   "icons": [
-    {
-      "src": "icons/icon-192x192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "icons/icon-512x512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
-    },
     {
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
@@ -26,6 +21,11 @@
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
     }
   ]
 }
