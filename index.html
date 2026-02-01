@@ -459,12 +459,36 @@
                 console.log('Geolocation is not supported by this browser.');
             }
 
-            // Enregistrement du service worker
+            // Enregistrement du service worker et gestion des mises à jour (SKIP_WAITING)
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').then(function(reg) {
                     console.log('Service worker registered.', reg);
+
+                    // Si un SW est déjà en attente d'activation
+                    if (reg.waiting) {
+                        if (confirm('Une nouvelle version est disponible. Voulez-vous la charger maintenant ?')) {
+                            reg.waiting.postMessage({type: 'SKIP_WAITING'});
+                        }
+                    }
+
+                    // Détecte l'arrivée d'un nouvel SW en cours d'installation
+                    reg.addEventListener('updatefound', function() {
+                        var newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                if (confirm('Une nouvelle version est installée. Redémarrer pour l\'activer ?')) {
+                                    newWorker.postMessage({type: 'SKIP_WAITING'});
+                                }
+                            }
+                        });
+                    });
                 }).catch(function(err) {
                     console.error('Service worker registration failed: ', err);
+                });
+
+                // Quand le nouveau SW prend le contrôle, on recharge pour activer la nouvelle version
+                navigator.serviceWorker.addEventListener('controllerchange', function() {
+                    window.location.reload();
                 });
             }
 

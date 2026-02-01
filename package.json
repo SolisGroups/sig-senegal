@@ -1,0 +1,11 @@
+{
+  "name": "sig-senegal",
+  "version": "1.0.0",
+  "description": "SIG Sénégal - application cartographique (Leaflet)",
+  "scripts": {
+    "build-sw": "node build-sw.js"
+  },
+  "devDependencies": {
+    "workbox-build": "^6.5.4"
+  }
+}
