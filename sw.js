@@ -33,81 +33,77 @@ self.addEventListener('activate', (event) => {
 async function trimCache(cacheName, maxItems) {
   const cache = await caches.open(cacheName);
   const keys = await cache.keys();
-  if (keys.length > maxItems) {
-    const deleteCount = keys.length - maxItems;
-    for (let i = 0; i < deleteCount; i++) {
-      await cache.delete(keys[i]);
-    }
-  }
-}
+  /* Workbox-based service worker
+     - precache app shell
+     - runtime cache for OSM tiles with expiration
+     - network-first for navigations with offline fallback
+  */
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-  // Strategy for OSM tiles (cache-first with size limit)
-  if (url.hostname.includes('tile.openstreetmap.org') || url.pathname.match(/\/(tiles?|v\d)\//) ) {
-    event.respondWith(
-      caches.open(TILE_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request);
-        if (cached) return cached;
-        try {
-          const resp = await fetch(event.request);
-          if (resp && resp.status === 200) cache.put(event.request, resp.clone());
-          trimCache(TILE_CACHE, MAX_TILE_ENTRIES);
-          return resp;
-        } catch (err) {
-          return caches.match('offline.html');
-        }
+  if (workbox) {
+    workbox.setConfig({debug: false});
+
+    // Precaching important assets
+    workbox.precaching.precacheAndRoute([
+      {url:'/', revision: null},
+      {url:'index.html', revision: null},
+      {url:'offline.html', revision: null},
+      {url:'css/leaflet.css', revision: null},
+      {url:'css/modern-ui.css', revision: null},
+      {url:'css/map-extensions.css', revision: null},
+      {url:'css/pwa-mobile.css', revision: null},
+      {url:'js/leaflet.js', revision: null},
+      {url:'js/app-modern.js', revision: null},
+      {url:'js/gps-control.js', revision: null},
+      {url:'manifest.json', revision: null},
+      {url:'icons/icon-192x192.png', revision: null},
+      {url:'icons/icon-512x512.png', revision: null}
+    ], {ignoreURLParametersMatching: [/.*/]});
+
+    // Navigation route: network-first, fallback to offline.html
+    workbox.routing.registerRoute(
+      ({request}) => request.mode === 'navigate',
+      new workbox.strategies.NetworkFirst({
+        cacheName: 'pages-cache',
+        plugins: [new workbox.expiration.ExpirationPlugin({maxEntries:50})]
       })
     );
-    return;
-  }
 
-  // Network-first for API/data, fallback to cache
-  if (event.request.method === 'GET' && (event.request.destination === '' || event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style' || event.request.destination === 'image')) {
-    event.respondWith(
-      fetch(event.request).then((resp) => {
-        if (event.request.mode === 'navigate' || event.request.destination === 'document') {
-          caches.open(APP_CACHE).then((cache) => cache.put(event.request, resp.clone()));
-        }
-        return resp;
-      }).catch(() => caches.match(event.request).then((r) => r || caches.match('offline.html')))
+    // Static resources: stale-while-revalidate
+    workbox.routing.registerRoute(
+      ({request}) => ['script','style','image','font'].includes(request.destination),
+      new workbox.strategies.StaleWhileRevalidate({cacheName: 'static-resources', plugins: [new workbox.expiration.ExpirationPlugin({maxEntries:100})]})
     );
-    return;
+
+    // OSM tiles: cache-first with expiration and cacheable response
+    workbox.routing.registerRoute(
+      ({url}) => url.hostname.includes('tile.openstreetmap.org') || url.pathname.match(/\/(tiles?|v\d)\//),
+      new workbox.strategies.CacheFirst({
+        cacheName: 'osm-tiles',
+        plugins: [
+          new workbox.expiration.ExpirationPlugin({maxEntries:600, maxAgeSeconds: 30*24*60*60}),
+          new workbox.cacheableResponse.CacheableResponsePlugin({statuses:[0,200]})
+        ]
+      })
+    );
+
+    // Fallback handler for failed navigation
+    self.addEventListener('fetch', (event) => {
+      if (event.request.mode === 'navigate') {
+        event.respondWith(
+          fetch(event.request).catch(() => caches.match('offline.html'))
+        );
+      }
+    });
+
+    // Message handlers
+    self.addEventListener('message', (event) => {
+      if (!event.data) return;
+      if (event.data.type === 'SKIP_WAITING') self.skipWaiting();
+      if (event.data.type === 'CLEAR_TILE_CACHE') caches.delete('osm-tiles');
+    });
+
+  } else {
+    console.error('Workbox failed to load');
   }
-
-  // Default: try cache, then network
-  event.respondWith(caches.match(event.request).then((r) => r || fetch(event.request)));
-});
-
-self.addEventListener('message', (e) => {
-  if (e.data && e.data.type === 'CLEAR_TILE_CACHE') {
-    caches.delete(TILE_CACHE);
-  }
-});
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open('sig-senegal-cache').then(function(cache) {
-        return cache.addAll([
-        'index.html',
-        './',
-        'css/fontawesome-all.min.css',
-        'css/leaflet.css',
-        'js/app-modern.js',
-        'images/',
-        'icons/icon-192x192.svg',
-        'icons/icon-512x512.svg',
-        'icons/icon-192x192.png',
-        'icons/icon-512x512.png'
-      ]);
-    })
-  );
-});
-
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );
-});
