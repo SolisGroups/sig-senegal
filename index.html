@@ -459,26 +459,35 @@
                 console.log('Geolocation is not supported by this browser.');
             }
 
-            // Enregistrement du service worker et gestion des mises à jour (SKIP_WAITING)
+            // Enregistrement du service worker et gestion des mises à jour (toast + SKIP_WAITING)
             if ('serviceWorker' in navigator) {
+                var swWaitingWorker = null;
+
+                function showSWUpdateToast(message, worker) {
+                  swWaitingWorker = worker || null;
+                  var toast = document.getElementById('sw-toast');
+                  var msg = toast.querySelector('.sw-message');
+                  msg.textContent = message || 'Une nouvelle version est disponible.';
+                  toast.classList.remove('hidden');
+                }
+
+                function hideSWUpdateToast() {
+                  var toast = document.getElementById('sw-toast');
+                  toast.classList.add('hidden');
+                }
+
                 navigator.serviceWorker.register('sw.js').then(function(reg) {
                     console.log('Service worker registered.', reg);
 
-                    // Si un SW est déjà en attente d'activation
                     if (reg.waiting) {
-                        if (confirm('Une nouvelle version est disponible. Voulez-vous la charger maintenant ?')) {
-                            reg.waiting.postMessage({type: 'SKIP_WAITING'});
-                        }
+                        showSWUpdateToast('Une nouvelle version est prête. Cliquez pour mettre à jour.', reg.waiting);
                     }
 
-                    // Détecte l'arrivée d'un nouvel SW en cours d'installation
                     reg.addEventListener('updatefound', function() {
                         var newWorker = reg.installing;
                         newWorker.addEventListener('statechange', function() {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                if (confirm('Une nouvelle version est installée. Redémarrer pour l\'activer ?')) {
-                                    newWorker.postMessage({type: 'SKIP_WAITING'});
-                                }
+                                showSWUpdateToast('Nouvelle version installée. Cliquez pour redémarrer.', newWorker);
                             }
                         });
                     });
@@ -489,6 +498,17 @@
                 // Quand le nouveau SW prend le contrôle, on recharge pour activer la nouvelle version
                 navigator.serviceWorker.addEventListener('controllerchange', function() {
                     window.location.reload();
+                });
+
+                // Actions du toast
+                document.addEventListener('click', function(e){
+                  if (e.target && e.target.id === 'sw-update-btn') {
+                    if (swWaitingWorker) swWaitingWorker.postMessage({type:'SKIP_WAITING'});
+                    hideSWUpdateToast();
+                  }
+                  if (e.target && e.target.id === 'sw-dismiss-btn') {
+                    hideSWUpdateToast();
+                  }
                 });
             }
 
@@ -518,6 +538,14 @@
             });
         })();
     </script>
+        <!-- Service Worker update toast -->
+        <div id="sw-toast" class="sw-toast hidden" role="status" aria-live="polite">
+            <div class="sw-message">Une nouvelle version est disponible.</div>
+            <div style="margin-left:8px">
+                <button id="sw-update-btn" class="sw-update">Mettre à jour</button>
+                <button id="sw-dismiss-btn" class="sw-dismiss">Plus tard</button>
+            </div>
+        </div>
 </body>
 
 </html>
