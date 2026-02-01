@@ -4,6 +4,7 @@ const TILE_CACHE = `tile-cache-${CACHE_VERSION}`;
 const APP_SHELL = [
   './',
   'index.html',
+  'offline.html',
   'css/leaflet.css',
   'css/modern-ui.css',
   'css/map-extensions.css',
@@ -66,12 +67,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method === 'GET' && (event.request.destination === '' || event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style' || event.request.destination === 'image')) {
     event.respondWith(
       fetch(event.request).then((resp) => {
-        // update app shell cache for navigations/resources
         if (event.request.mode === 'navigate' || event.request.destination === 'document') {
           caches.open(APP_CACHE).then((cache) => cache.put(event.request, resp.clone()));
         }
         return resp;
-      }).catch(() => caches.match(event.request).then((r) => r || caches.match('./')))
+      }).catch(() => caches.match(event.request).then((r) => r || caches.match('offline.html')))
     );
     return;
   }
