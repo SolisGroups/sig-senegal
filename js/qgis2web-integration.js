@@ -262,7 +262,7 @@ function initializeRegionLayer() {
     });
 
     window.bounds_group.addLayer(layer_Region_1);
-    map.addLayer(layer_Region_1);
+    
     window.layer_Region_1 = layer_Region_1;
 }
 
@@ -333,7 +333,7 @@ function initializeDepartementLayer() {
     });
 
     window.bounds_group.addLayer(layer_Departement_2);
-    map.addLayer(layer_Departement_2);
+    
     window.layer_Departement_2 = layer_Departement_2;
 }
 
@@ -520,7 +520,7 @@ function initializeRoutesLayer() {
     });
 
     window.bounds_group.addLayer(layer_Routes_4);
-    map.addLayer(layer_Routes_4);
+    
     window.layer_Routes_4 = layer_Routes_4;
 }
 
@@ -601,7 +601,7 @@ function initializeLocalitesLayer() {
     cluster_localites_5.addLayer(layer_localites_5);
 
     window.bounds_group.addLayer(layer_localites_5);
-    cluster_localites_5.addTo(map);
+    
 
     window.layer_localites_5 = layer_localites_5;
     window.cluster_localites_5 = cluster_localites_5;
@@ -643,11 +643,14 @@ function setupLayerControl() {
                 console.warn('Layer not found:', overlay.label);
                 return;
             }
+            
+            const isChecked = overlay.label.includes('Arrondissements');
+            const checkedAttr = isChecked ? 'checked' : '';
 
             const label = document.createElement('label');
             label.className = 'layer-item';
             label.innerHTML = `
-                <input type="checkbox" data-layer-index="${index}" checked>
+                <input type="checkbox" data-layer-index="${index}" ${checkedAttr}>
                 <span>${overlay.label}</span>
             `;
             label.style.display = 'flex';

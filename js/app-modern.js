@@ -765,7 +765,7 @@ function setupAttributeQuery() {
 function toggleLayersPanel() {
     const leftPanel = document.querySelector('.left-panel');
     if (leftPanel) {
-        leftPanel.classList.toggle('hidden');
+        leftPanel.classList.toggle('panel-collapsed');
         panelStates.left = !panelStates.left;
         map.invalidateSize();
         setTimeout(() => map.invalidateSize(), 100);
@@ -793,7 +793,7 @@ function setupPanelToggle() {
     if (toggleLeftBtn && leftPanel) {
         toggleLeftBtn.addEventListener('click', function () {
             panelStates.left = !panelStates.left;
-            leftPanel.classList.toggle('hidden');
+            leftPanel.classList.toggle('panel-collapsed');
             map.invalidateSize();
             setTimeout(() => map.invalidateSize(), 100);
         });
@@ -802,7 +802,7 @@ function setupPanelToggle() {
     if (toggleRightBtn && rightPanel) {
         toggleRightBtn.addEventListener('click', function () {
             panelStates.right = !panelStates.right;
-            rightPanel.classList.toggle('hidden');
+            rightPanel.classList.toggle('panel-collapsed');
             map.invalidateSize();
             setTimeout(() => map.invalidateSize(), 100);
         });
@@ -817,16 +817,16 @@ function setupResponsive() {
             // Mode mobile
             const leftPanel = document.querySelector('.left-panel');
             const rightPanel = document.querySelector('.right-panel');
-            if (leftPanel) leftPanel.classList.add('hidden');
-            if (rightPanel) rightPanel.classList.add('hidden');
+            if (leftPanel) leftPanel.classList.add('panel-collapsed');
+            if (rightPanel) rightPanel.classList.add('panel-collapsed');
             panelStates.left = false;
             panelStates.right = false;
         } else {
             // Mode desktop
             const leftPanel = document.querySelector('.left-panel');
             const rightPanel = document.querySelector('.right-panel');
-            if (leftPanel) leftPanel.classList.remove('hidden');
-            if (rightPanel) rightPanel.classList.remove('hidden');
+            if (leftPanel) leftPanel.classList.remove('panel-collapsed');
+            if (rightPanel) rightPanel.classList.remove('panel-collapsed');
             panelStates.left = true;
             panelStates.right = true;
         }
