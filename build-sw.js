@@ -12,6 +12,7 @@ const path = require('path');
         'offline.html',
         'css/**/*.css',
         'js/**/*.js',
+        'icons/*.svg',
         'css/images/*.png',
         'css/images/*.gif',
         'images/*.gif',
