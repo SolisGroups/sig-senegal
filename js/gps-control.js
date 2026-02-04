@@ -22,8 +22,30 @@
 
     var userMarker, accuracyCircle;
     map.on('locationfound', function(e){
-      if (userMarker) { userMarker.setLatLng(e.latlng); } else { userMarker = L.marker(e.latlng).addTo(map); }
-      if (accuracyCircle) { accuracyCircle.setLatLng(e.latlng).setRadius(e.accuracy); } else { accuracyCircle = L.circle(e.latlng, {radius: e.accuracy, color:'#2b5d6f', fillColor:'#2b5d6f', fillOpacity:0.15}).addTo(map); }
+      var gpsIcon = L.divIcon({
+        className: 'gps-marker',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      // Draw accuracy circle first so it's underneath the marker
+      if (accuracyCircle) { 
+        accuracyCircle.setLatLng(e.latlng).setRadius(e.accuracy); 
+      } else { 
+        accuracyCircle = L.circle(e.latlng, {
+          radius: e.accuracy, 
+          color: '#1a73e8', 
+          fillColor: '#1a73e8', 
+          fillOpacity: 0.15,
+          weight: 1
+        }).addTo(map); 
+      }
+      
+      if (userMarker) { 
+        userMarker.setLatLng(e.latlng); 
+      } else { 
+        userMarker = L.marker(e.latlng, {icon: gpsIcon}).addTo(map); 
+      }
     });
     map.on('locationerror', function(){ console.warn('Impossible de récupérer la position'); });
   }

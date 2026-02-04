@@ -440,3 +440,29 @@
     /* Ensure toolbars and floating controls remain accessible */
     .map-toolbar { left: 10px; bottom: 80px; }
 }
+
+/* Pulsating GPS marker */
+.gps-marker {
+  width: 18px;
+  height: 18px;
+  background-color: #1a73e8;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 15px rgba(26, 115, 232, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(26, 115, 232, 0);
+  }
+}
